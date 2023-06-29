@@ -1,0 +1,156 @@
+<!doctype html>
+
+<h1>window.open</h1>
+<button id="btn_open">새창 열기</button><br>
+<span id="popup_text"></span>
+
+<h1>alert</h1>
+<input id="inp_alert" value="alert"> <button id="btn_alert">alert</button>
+
+<h1>confirm</h1>
+<input id="inp_confirm" value="confirm"> <button id="btn_confirm">confirm</button><br>
+결과: <span id="confirm_result"></span>
+
+<h1>prompt</h1>
+<input id="inp_prompt" value="prompt"> <button id="btn_prompt">prompt</button><br>
+결과: <span id="prompt_result"></span>
+
+<h1>웹뷰 닫기</h1>
+nextScheme: <input id="inp_webview_close" type="text"> <button id="btn_webview_close">웹뷰 닫기</button>
+
+<h1>토스트</h1>
+<input id="inp_toast" type="text" value="Toast"> <button id="btn_toast">토스트 표시</button>
+
+<h1>바텀 시트</h1>
+
+<button data-bottom-sheet data-uid='select1'>바텀시트 (selectBox, 선택 없음)</button><br>
+선택 값: <span id="bottom_sheet_select1"></span><br><br>
+
+<button data-bottom-sheet data-uid='select2'>바텀시트 (selectBox, 선택 있음)</button><br>
+선택 값: <span id="bottom_sheet_select2"></span><br><br>
+
+
+<button data-bottom-sheet data-uid='check1'>바텀시트 (checkBox, 선택 없음)</button><br>
+선택 값: <span id="bottom_sheet_check1"></span><br><br>
+
+<button data-bottom-sheet data-uid='check2'>바텀시트 (checkBox, 선택 있음)</button><br>
+선택 값: <span id="bottom_sheet_check2"></span><br><br>
+
+
+<script>
+  function scheme(url) {
+  const iframe = document.createElement('iframe');
+  iframe.setAttribute('style', 'border:0;width:0;height:0');
+  iframe.src = url;
+  document.querySelector('body').appendChild(iframe);
+  setTimeout(() => {
+    iframe.remove();
+  }, 100);
+}
+
+function popupCallback(text) {
+  document.querySelector('#popup_text').innerText = text;
+}
+
+document.querySelector('#btn_open').addEventListener('click', () => {
+  const popup = window.open('about:blank');
+  popup.document.write(`
+  <input type="text"><button>호출 윈도우에 반영하고 닫기</button>
+  <script>
+  document.querySelector('button').addEventListener('click', () => {
+    const text = document.querySelector('input').value;
+    opener.popupCallback(text);
+    window.close();
+  });
+  </sc`+`ript>
+`)
+});
+
+document.querySelector('#btn_alert').addEventListener('click', () => {
+  const text = document.querySelector('#inp_alert').value;
+  alert(text);
+});
+
+document.querySelector('#btn_confirm').addEventListener('click', () => {
+  const text = document.querySelector('#inp_confirm').value;
+  const result = confirm(text);
+  document.querySelector('#confirm_result').innerText = result;
+});
+
+document.querySelector('#btn_prompt').addEventListener('click', () => {
+  const text = document.querySelector('#inp_prompt').value;
+  const result = prompt(text);
+  document.querySelector('#prompt_result').innerText = result;
+});
+
+document.querySelector('#btn_webview_close').addEventListener('click', () => {
+  const nextScheme = document.querySelector('#inp_webview_close').value;
+  scheme(`webview://close?nextScheme=${encodeURIComponent(nextScheme)}`);
+});
+
+document.querySelector('#btn_toast').addEventListener('click', () => {
+  const toast = document.querySelector('#inp_toast').value;
+  scheme(`webview://toast?message=${encodeURIComponent(toast)}`);
+});
+
+const icon1 = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgZmlsbD0iY3VycmVudENvbG9yIiBjbGFzcz0iYmkgYmktMS1zcXVhcmUtZmlsbCIgdmlld0JveD0iMCAwIDE2IDE2Ij4KICA8cGF0aCBkPSJNMiAwYTIgMiAwIDAgMC0yIDJ2MTJhMiAyIDAgMCAwIDIgMmgxMmEyIDIgMCAwIDAgMi0yVjJhMiAyIDAgMCAwLTItMkgyWm03LjI4MyA0LjAwMlYxMkg3Ljk3MVY1LjMzOGgtLjA2NUw2LjA3MiA2LjY1NlY1LjM4NWwxLjg5OS0xLjM4M2gxLjMxMloiLz4KPC9zdmc+`;
+const icon2 = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgZmlsbD0iY3VycmVudENvbG9yIiBjbGFzcz0iYmkgYmktMi1zcXVhcmUtZmlsbCIgdmlld0JveD0iMCAwIDE2IDE2Ij4KICA8cGF0aCBkPSJNMiAwYTIgMiAwIDAgMC0yIDJ2MTJhMiAyIDAgMCAwIDIgMmgxMmEyIDIgMCAwIDAgMi0yVjJhMiAyIDAgMCAwLTItMkgyWm00LjY0NiA2LjI0di4wN0g1LjM3NXYtLjA2NGMwLTEuMjEzLjg3OS0yLjQwMiAyLjYzNy0yLjQwMiAxLjU4MiAwIDIuNjEzLjk0OSAyLjYxMyAyLjIxNSAwIDEuMDAyLS42IDEuNjY3LTEuMjg3IDIuNDNsLS4wOTYuMTA3LTEuOTc0IDIuMjJ2LjA3N2gzLjQ5OFYxMkg1LjQyMnYtLjgzMmwyLjk3LTMuMjkzYy40MzQtLjQ3NS45MDMtMS4wMDguOTAzLTEuNzA1IDAtLjc0NC0uNTU3LTEuMjM2LTEuMzEzLTEuMjM2LS44NDMgMC0xLjMzNi42MTUtMS4zMzYgMS4zMDZaIi8+Cjwvc3ZnPg==`;
+const icon3 = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgZmlsbD0iY3VycmVudENvbG9yIiBjbGFzcz0iYmkgYmktMy1zcXVhcmUtZmlsbCIgdmlld0JveD0iMCAwIDE2IDE2Ij4KICA8cGF0aCBkPSJNMiAwYTIgMiAwIDAgMC0yIDJ2MTJhMiAyIDAgMCAwIDIgMmgxMmEyIDIgMCAwIDAgMi0yVjJhMiAyIDAgMCAwLTItMkgyWm01LjkxOCA4LjQxNGgtLjg3OVY3LjM0MmguODM4Yy43OCAwIDEuMzQ4LS41MjIgMS4zNDItMS4yMzcgMC0uNzA5LS41NjMtMS4xOTUtMS4zNDgtMS4xOTUtLjc5IDAtMS4zMTIuNDk4LTEuMzQ4IDEuMDU1SDUuMjc1Yy4wMzYtMS4xMzcuOTUtMi4xMTUgMi42MjUtMi4xMjEgMS41OTQtLjAxMiAyLjYwOC44ODUgMi42MzcgMi4wNjIuMDIzIDEuMTM3LS44ODUgMS43NzYtMS40ODIgMS44NzV2LjA3Yy43MDMuMDcgMS43MS42NCAxLjczNCAxLjkxNy4wMjQgMS40NTktMS4yNzcgMi4zOTYtMi45MyAyLjM5Ni0xLjcwNSAwLTIuNzA3LS45NjctMi43NTQtMi4xNDRINi4zM2MuMDU5LjU5Ny42OCAxLjA2IDEuNTQxIDEuMDY2Ljk3My4wMDYgMS42LS41NjMgMS41ODgtMS4zNTQtLjAwNi0uNzc5LS42MjEtMS4zMTgtMS41NDEtMS4zMThaIi8+Cjwvc3ZnPg==`;
+
+const bottomSheet = [
+  {
+    title: '첫번째',
+    iconUrl: icon1    
+  },
+  {
+    title: '두번째',
+    iconUrl: icon2
+  },
+  {
+    title: '세번째',
+    iconUrl: icon3
+  }
+];
+
+const selectedIndex = {
+  select1: undefined,
+  select2: 0,
+  check1: [],
+  check2: [0]
+}
+
+const bottomSheetType = {
+  select1: 'selectBox',
+  select2: 'selectBox',
+  check1: 'checkBox',
+  check2: 'checkBox'
+}
+
+function getBottomSheet(uid) {
+  return JSON.stringify({
+    type: bottomSheetType[uid],
+    selectedIndex: selectedIndex[uid],
+    items: bottomSheet
+  });
+}
+
+function resultBottomSheet(uid, _selectedIndex) {
+  if (uid.indexOf('check') > -1) {
+    selectedIndex[uid] = JSON.parse(_selectedIndex);
+    document.querySelector(`#bottom_sheet_${uid}`).innerText = bottomSheet.filter((_, i) => selectedIndex[uid].includes(i)).map(v => v.title).join(', ');
+  } else {
+    selectedIndex[uid] = _selectedIndex;
+    document.querySelector(`#bottom_sheet_${uid}`).innerText = bottomSheet[selectedIndex[uid]].title;
+  } 
+}
+
+document.querySelectorAll('[data-bottom-sheet]').forEach(elm => elm.addEventListener('click', (e) => {
+  const uid = e.target.getAttribute('data-uid');
+  
+  scheme(`webview://showSelectBottomSheet?getFunc=getBottomSheet&resultFunc=resultBottomSheet&uid=${uid}`)
+  
+}));
+
+resultBottomSheet('select2', 0);
+resultBottomSheet('check2', '[0, 1]');
+</script>
